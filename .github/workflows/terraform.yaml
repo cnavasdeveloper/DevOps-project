@@ -1,0 +1,52 @@
+# This workflow will deploy a bucket S3 in AWS with terraform
+name: Backup S3
+
+on:
+  workflow_run:
+    workflows:
+      - "Docker"
+    branches: [ main ]
+    types:
+      - completed
+      
+jobs:
+  deploy-bucket:
+     name: terraform
+     runs-on: ubuntu-latest
+     steps:
+    
+     - name: Checkout
+       uses: actions/checkout@v2
+    
+     - name: Setup Terraform
+       uses: hashicorp/setup-terraform@v2
+    
+     - name: Setup AWS Credentials
+       uses: aws-actions/configure-aws-credentials@v1
+      
+       with:
+         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         aws-region: "eu-west-1"
+   
+     - name: Init
+       run: terraform init
+       working-directory: ./terraform
+    
+     - name: Plan
+       run: terraform plan
+       working-directory: ./terraform
+    
+     - name: Apply, Create tgz and Upload
+       run: |
+            terraform apply -auto-approve
+            NOMBRE_BUCKET=$(terraform output | grep -o "deadbycloud-....." | head -1)
+            tar -cvzf backup.tgz ../flask-pastebin/*
+            aws s3 cp backup.tgz s3://$NOMBRE_BUCKET/   
+            rm backup.tgz 
+       working-directory: ./terraform
+                     
+ 
+     - name: Clean
+       run: rm -r .terraform/ && rm .terraform.* && rm terraform.*
+       working-directory: ./terraform

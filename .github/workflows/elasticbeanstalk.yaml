@@ -1,0 +1,35 @@
+name: Deploy App
+
+on:
+  workflow_run:
+    workflows:
+      - "Backup S3"
+    branches: [ main ]
+    types:
+      - completed
+      
+jobs:
+  deploy-app:
+     name: elasticbeanstalk
+     runs-on: ubuntu-latest
+     steps:
+    
+     - name: Checkout
+       uses: actions/checkout@v2
+    
+     - name: Setup AWS Credentials
+       uses: aws-actions/configure-aws-credentials@v1
+       with:
+         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         aws-region: "eu-west-1"
+      
+     - name: Setup EB CLI
+       uses: sparkplug-app/install-eb-cli-action@v1.0.0
+       
+     - name: Create app & deploy
+       working-directory: ./flask-pastebin
+       run: |
+            rm -rf .elasticbeanstalk/
+            eb init -p python-3.8 flask-pastebin --region eu-west-1
+            eb create flask-env
