@@ -50,12 +50,12 @@
 Para el clonado del repositorio solo es necesario realizarlo de la siguiente manera:
 
  ```
-git clone git@github.com:KeepCodingCloudDevops6/practica-final-deadbycloud.git
+git clone git@github.com:cnavasdeveloper/DevOps-project.git
 ```
  o bien,
 
 ```
-git clone https://github.com/KeepCodingCloudDevops6/practica-final-deadbycloud.git
+git clone https://github.com/cnavasdeveloper/DevOps-project.git
 ```
 
 
